@@ -1,45 +1,62 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 from .models import User, EmailVerificationCode
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
+from .services import register_user
 
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
+class UserRegistrationSerializer(serializers.Serializer):
+    nickname = serializers.CharField(max_length=30)
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True, validators=[validate_password])
-    email_verification_code = serializers.CharField(write_only=True, required=False)
-
-    class Meta:
-        model = User
-        fields = ['email', 'password', 'nickname', 'email_verification_code']
-
-    def validate_email_verification_code(self, code):
-        try:
-            verification_code = EmailVerificationCode.objects.get(
-                code=code,
-                user__email=self.initial_data['email'],
-                is_used=False
-            )
-            if (timezone.now() - verification_code.created_at).seconds > 300:  # 5분 유효
-                raise ValidationError("Verification code expired.")
-            return code
-        except EmailVerificationCode.DoesNotExist:
-            raise ValidationError("Invalid verification code.")
 
     def create(self, validated_data):
-        validated_data.pop('email_verification_code', None)  # 이미 검증한 코드 제거
-        user = User.objects.create_user(**validated_data) # 새로운 사용자 생성
-        user.is_active = True # 사용자 활성화 (이메일 인증 완료)
-        user.save()
-
-        EmailVerificationCode.objects.filter( # 이메일 인증 코드 사용 처리
-            user=user,
-            code=self.initial_data['email_verification_code']
-        ).update(is_used=True)
-
+        user = register_user(
+            nickname=validated_data['nickname'],
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
         return user
+    
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with that email already exists.")
+        return value
 
+    def validate_nickname(self, value):
+        if User.objects.filter(nickname=value).exists():
+            raise serializers.ValidationError("This nickname is already taken.")
+        return value
+
+class EmailVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+    
+    def validate(self, attrs):
+        email = attrs.get('email')
+        code = attrs.get('code')
+        try:
+            user = User.objects.get(email=email)
+            verification_record = EmailVerificationCode.objects.get(user=user, code=code, is_used=False)
+        except (User.DoesNotExist, EmailVerificationCode.DoesNotExist):
+            raise serializers.ValidationError("Invalid verification code or email.")
+        
+        if verification_record.is_expired():
+            raise serializers.ValidationError("The verification code has expired.")
+        
+        attrs['user'] = user
+        attrs['verification_record'] = verification_record
+        return attrs
+    
+    def save(self):
+        user = self.validated_data['user']
+        verification_record = self.validated_data['verification_record']
+        user.is_active = True
+        user.save()
+        verification_record.is_used = True
+        verification_record.save()
+        return user
 
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
