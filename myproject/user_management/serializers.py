@@ -1,8 +1,9 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.exceptions import ValidationError
-from .models import User, EmailVerificationCode
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import check_password
+from .models import User, EmailVerificationCode
 from .services import register_user
 
 
@@ -28,6 +29,7 @@ class UserRegistrationSerializer(serializers.Serializer):
         if User.objects.filter(nickname=value).exists():
             raise serializers.ValidationError("This nickname is already taken.")
         return value
+
 
 class EmailVerificationSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -58,15 +60,39 @@ class EmailVerificationSerializer(serializers.Serializer):
         verification_record.save()
         return user
 
+
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
-    def validate(self, data):
-        user = authenticate(**data)
-        if user and user.is_active:
-            return user
-        raise serializers.ValidationError("Invalid credentials or account not activated.")
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+        
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid credentials.")
+        
+        if not check_password(password, user.password):
+            raise serializers.ValidationError("Invalid credentials.")
+
+        if not user.is_active:
+            raise serializers.ValidationError("Account is not activated.")
+        
+        attrs['user'] = user
+        return attrs
+
+    
+    def save(self, **kwargs):
+        user = self.validated_data['user']
+        
+        # JWT 토큰 생성
+        refresh = RefreshToken.for_user(user)
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
