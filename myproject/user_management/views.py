@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserRegistrationSerializer
 from .serializers import EmailVerificationSerializer
+from .serializers import UserLoginSerializer
 
 class UserRegistrationView(APIView):
     def post(self, request):
@@ -18,4 +19,13 @@ class EmailVerificationView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "Email verification successful."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserLoginView(APIView):
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            tokens = serializer.save()
+            return Response(tokens, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
