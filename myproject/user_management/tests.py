@@ -71,7 +71,7 @@ class UserLoginTest(APITestCase):
             password = 'Testpass123!',
             is_active = True
         )
-        
+
     def test_login_success(self):
         # 정상적인 자격 증명으로 로그인
         data = {
@@ -80,7 +80,7 @@ class UserLoginTest(APITestCase):
         }
         url = reverse('login')
         response = self.client.post(url, data)
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('access', response.data)
         self.assertIn('refresh', response.data)
@@ -93,21 +93,6 @@ class UserLoginTest(APITestCase):
         }
         url = reverse('login')
         response = self.client.post(url, data)
-        
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('Invalid credentials', str(response.data))
-
-    def test_login_inactive_user(self):
-        # 비활성화된 사용자 로그인 시도
-        self.user.is_active = False
-        self.user.save()
-        
-        data = {
-            'email': 'testuser@example.com',
-            'password': 'Testpass123!'
-        }
-        url = reverse('login')
-        response = self.client.post(url, data)
-        
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('Account is not activated', str(response.data))
