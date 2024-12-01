@@ -84,6 +84,7 @@ class UserLoginTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('access', response.data)
         self.assertIn('refresh', response.data)
+        self.assertIn('is_active', response.data)
 
     def test_login_invalid_credentials(self):
         # 잘못된 자격 증명으로 로그인 시도
