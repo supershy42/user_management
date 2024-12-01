@@ -2,6 +2,7 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 from .models import FriendRequest, Friendship
 from django.contrib.auth import get_user_model
+from unittest.mock import patch
 
 User = get_user_model()
 
@@ -43,8 +44,8 @@ class RespondToFriendRequestTest(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Friendship.objects.count(), 1)
-        self.assertEqual(Friendship.objects.first().user1, self.user2)
-        self.assertEqual(Friendship.objects.first().user2, self.user1)
+        self.assertEqual(Friendship.objects.first().user1.id, min(self.user1.id, self.user2.id))
+        self.assertEqual(Friendship.objects.first().user2.id, max(self.user1.id, self.user2.id))
 
 
 class FriendListTest(APITestCase):
@@ -63,10 +64,12 @@ class FriendListTest(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['id'], self.user2.id)
 
-    def test_friend_list_no_friends(self):
-        # 친구가 없는 경우
+    @patch('friend.views.get_friends_list', return_value=None)
+    def test_friend_list_none(self, mock_get_friends_list):
+        # 친구 목록이 None인 경우
+        mock_get_friends_list.return_value = None
         url = reverse('list')
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.data['message'], "No friends found.")
+        self.assertEqual(response.data['message'], "Friends list is not initialized or unavailable.")

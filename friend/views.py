@@ -41,9 +41,9 @@ class FriendListView(APIView):
 
     def get(self, request):
         friends = get_friends_list(request.user)
-        if not friends:
+        if friends is None:
             return Response(
-                {"message": "No friends found."},
+                {"message": "Friends list is not initialized or unavailable."},
                 status=status.HTTP_404_NOT_FOUND
             )
         return Response(friends, status=status.HTTP_200_OK)

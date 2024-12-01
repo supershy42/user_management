@@ -39,10 +39,10 @@ class Friendship(models.Model):
                 # 한 쌍의 친구 관계는 한 번만 저장
                 fields=['user1', 'user2'],
                 name='unique_friendship'
-            ),
-            models.CheckConstraint(
-                # user1이 user2보다 작아야 함
-                check=models.Q(user1__lt=models.F('user2')),
-                name='force_user_order'
             )
         ]
+        
+    def save(self, *args, **kwargs):
+        if self.user1_id > self.user2_id:
+            self.user1_id, self.user2_id = self.user2_id, self.user1_id
+        super().save(*args, **kwargs)
