@@ -4,6 +4,8 @@ from rest_framework import status
 from .serializers import UserRegistrationSerializer
 from .serializers import EmailVerificationSerializer
 from .serializers import UserLoginSerializer
+from .serializers import EmailVerifyRequestSerializer
+from . import services
 
 class UserRegistrationView(APIView):
     def post(self, request):
@@ -12,6 +14,17 @@ class UserRegistrationView(APIView):
             serializer.save()
             return Response({"message": "Registration successful. Please check your email for the verification code."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class EmailVerifyRequestView(APIView):
+    def post(self, request):
+        serializer = EmailVerifyRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            services.request_verification_code(email)
+            return Response({"message": "Verification code sent."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     
 class EmailVerificationView(APIView):
     def post(self, request):
