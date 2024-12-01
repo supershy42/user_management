@@ -1,11 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import UserRegistrationSerializer
-from .serializers import EmailVerificationSerializer
-from .serializers import UserLoginSerializer
-from .serializers import EmailVerifyRequestSerializer
+from .serializers import 
 from . import services
+from .serializers import UserRegistrationSerializer, EmailVerificationSerializer, UserLoginSerializer, UserProfileSerializer, EmailVerifyRequestSerializer
+from django.shortcuts import get_object_or_404
+from .models import User
 
 class UserRegistrationView(APIView):
     def post(self, request):
@@ -34,7 +34,6 @@ class EmailVerificationView(APIView):
             return Response({"message": "Email verification successful."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class UserLoginView(APIView):
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
@@ -42,3 +41,13 @@ class UserLoginView(APIView):
             tokens = serializer.save()
             return Response(tokens, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UserProfileView(APIView):
+    def get(self, request, user_id):
+        user = 
+        
+        
+        (User, id=user_id)
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data)
+    
