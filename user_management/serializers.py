@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import check_password
 from .models import User, EmailVerificationCode
-from .services import register_user
+from .services import register_user, process_email_verification_code
 
 
 class UserRegistrationSerializer(serializers.Serializer):
@@ -31,7 +31,7 @@ class UserRegistrationSerializer(serializers.Serializer):
         return value
 
 
-class EmailVerifyRequestSerializer(serializers.Serializer):
+class SendEmailCodeSerializer(serializers.Serializer):
     email = serializers.EmailField()
     
     def validate(self, attrs):
@@ -46,6 +46,10 @@ class EmailVerifyRequestSerializer(serializers.Serializer):
             raise serializers.ValidationError({"email": "This account is arleady active."})
         
         return attrs
+    
+    def save(self):
+        email = self.validated_data['email']
+        process_email_verification_code(email)
 
 
 class EmailVerificationSerializer(serializers.Serializer):

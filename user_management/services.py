@@ -10,7 +10,7 @@ User = get_user_model()
 def generate_verification_code(length=6):
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
-def send_verification_email(email, code):
+def send_verification_code(email, code):
     subject = "Email Verification"
     message = f"Your verification code is: {code}"
     from_email = settings.DEFAULT_FROM_EMAIL
@@ -20,11 +20,11 @@ def send_verification_email(email, code):
 def expire_previous_codes(email):
     EmailVerificationCode.objects.filter(email=email, is_used=False).update(is_used=True)
     
-def request_verification_code(email):
+def process_email_verification_code(email):
     expire_previous_codes(email)
     code = generate_verification_code()
     EmailVerificationCode.objects.create(email=email, code=code)
-    send_verification_email(email, code)
+    send_verification_code(email, code)
 
 def register_user(nickname, email, password):
     user = User.objects.create_user(
@@ -34,5 +34,5 @@ def register_user(nickname, email, password):
         is_active=False
     )
     
-    request_verification_code(email)
+    process_email_verification_code(email)
     return user

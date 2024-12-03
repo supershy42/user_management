@@ -4,8 +4,7 @@ from rest_framework import status
 from .serializers import UserRegistrationSerializer
 from .serializers import EmailVerificationSerializer
 from .serializers import UserLoginSerializer
-from .serializers import EmailVerifyRequestSerializer
-from . import services
+from .serializers import SendEmailCodeSerializer
 
 class UserRegistrationView(APIView):
     def post(self, request):
@@ -16,12 +15,11 @@ class UserRegistrationView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     
-class EmailVerifyRequestView(APIView):
+class SendEmailCodeView(APIView):
     def post(self, request):
-        serializer = EmailVerifyRequestSerializer(data=request.data)
+        serializer = SendEmailCodeSerializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data['email']
-            services.request_verification_code(email)
+            serializer.save()
             return Response({"message": "Verification code sent."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
