@@ -32,7 +32,6 @@ class EmailVerificationView(APIView):
             return Response({"message": "Email verification successful."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class UserLoginView(APIView):
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
@@ -40,3 +39,13 @@ class UserLoginView(APIView):
             tokens = serializer.save()
             return Response(tokens, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UserProfileView(APIView):
+    def get(self, request, user_id):
+        user = 
+        
+        
+        (User, id=user_id)
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data)
+    

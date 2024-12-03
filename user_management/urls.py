@@ -6,4 +6,5 @@ urlpatterns = [
     path('send-code/', SendEmailCodeView.as_view(), name='send-code'),
     path('verify-email/', EmailVerificationView.as_view(), name='verify-email'),
     path('login/', UserLoginView.as_view(), name='login'),
+    path('<int:user_id>/', UserProfileView.as_view(), name='user-profile')
 ]
