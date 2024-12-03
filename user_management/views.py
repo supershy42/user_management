@@ -42,8 +42,8 @@ class UserLoginView(APIView):
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
-            tokens = serializer.save()
-            return Response(tokens, status=status.HTTP_200_OK)
+            auth_data = serializer.save()
+            return Response(auth_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class UserProfileView(APIView):
@@ -51,4 +51,3 @@ class UserProfileView(APIView):
         user = get_object_or_404(User, id=user_id)
         serializer = UserProfileSerializer(user)
         return Response(serializer.data)
-    
