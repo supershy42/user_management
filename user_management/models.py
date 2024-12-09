@@ -44,5 +44,7 @@ class EmailVerificationCode(models.Model):
     
     @property
     def is_expired(self):
+        if self.is_used:
+            return True
         expiration_time = self.created_at + timedelta(minutes=5)  # 생성 후 5분 뒤 만료
         return timezone.now() > expiration_time
