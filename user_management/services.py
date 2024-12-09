@@ -25,14 +25,3 @@ def process_email_verification_code(email):
     code = generate_verification_code()
     EmailVerificationCode.objects.create(email=email, code=code)
     send_verification_code(email, code)
-
-def register_user(nickname, email, password):
-    user = User.objects.create_user(
-        nickname=nickname,
-        email=email,
-        password=password,
-        is_active=False
-    )
-    
-    process_email_verification_code(email)
-    return user
