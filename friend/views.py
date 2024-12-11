@@ -4,6 +4,7 @@ from rest_framework import status
 from .services import send_friend_request, respond_to_friend_request, get_friends_list
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError, NotFound
+from drf_spectacular.utils import extend_schema
 
 
 class SendFriendRequestView(APIView):
@@ -38,7 +39,14 @@ class RespondToFriendRequestView(APIView):
 
 class FriendListView(APIView):
     permission_classes = [IsAuthenticated]
-
+    @extend_schema(
+        summary="Get the friend list of the authenticated user",
+        responses={
+            200: "Successfully retrieved the friend list.",
+            401: "Authentication credentials were not provided or invalid.",
+            404: "Friends list is not initialized or unavailable.",
+        },
+    )
     def get(self, request):
         friends = get_friends_list(request.user)
         if friends is None:
