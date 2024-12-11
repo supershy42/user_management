@@ -9,6 +9,7 @@ from .serializers import (
     )
 from config.response_builder import response_ok, response_error
 from .models import User
+from rest_framework import status
 
 
 class NicknameCheckView(APIView):
@@ -24,7 +25,7 @@ class EmailCheckAndSendCodeView(APIView):
         serializer = EmailCheckAndSendCodeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return response_ok()
+            return response_ok(message="Verification code sent")
         return response_error(serializer.errors)
 
 
@@ -33,7 +34,7 @@ class UserRegisterView(APIView):
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return response_ok()
+            return response_ok(status=status.HTTP_201_CREATED)
         return response_error(serializer.errors)
 
 
