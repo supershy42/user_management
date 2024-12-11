@@ -32,6 +32,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -122,3 +123,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # Default User 모델 설정
 
 AUTH_USER_MODEL = 'user_management.User'
+
+# CORS
+CORS_ALLOW_ALL_ORIGINS = True
