@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from .serializers import (
     EmailCheckAndSendCodeSerializer,
@@ -6,16 +7,15 @@ from .serializers import (
     UserLoginSerializer,
     UserProfileSerializer
     )
-from django.shortcuts import get_object_or_404
-from .models import User
 from config.response_builder import response_ok, response_error
+from .models import User
 
 
 class NicknameCheckView(APIView):
     def post(self, request):
         serializer = NicknameCheckSerializer(data=request.data)
         if serializer.is_valid():
-            return response_ok("This nickname is available.")
+            return response_ok()
         return response_error(serializer.errors)
 
 
@@ -24,7 +24,7 @@ class EmailCheckAndSendCodeView(APIView):
         serializer = EmailCheckAndSendCodeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return response_ok("Verification code sent.")
+            return response_ok()
         return response_error(serializer.errors)
 
 
@@ -33,7 +33,7 @@ class UserRegisterView(APIView):
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return response_ok("Regstration successful.")
+            return response_ok()
         return response_error(serializer.errors)
 
 
