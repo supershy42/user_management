@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'config.middleware.CustomHttpMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -123,6 +124,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # Default User 모델 설정
 
 AUTH_USER_MODEL = 'user_management.User'
+
+# ASGI APPLICATION 설정
+ASGI_APPLICATION = 'config.routing.application'
 
 # CORS
 CORS_ALLOW_ALL_ORIGINS = True
