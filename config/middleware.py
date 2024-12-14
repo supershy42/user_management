@@ -5,10 +5,10 @@ from channels.middleware import BaseMiddleware
 from django.http import JsonResponse
 
 EXCLUDED_PATHS = [
-            '/register/email-check',
-            '/register/nickname-check',
-            '/register/complete',
-            '/login',
+            '/api/user/register/email-check/',
+            '/api/user/register/nickname-check/',
+            '/api/user/register/complete/',
+            '/api/user/login/',
 ]
 
 # HTTP Middleware
