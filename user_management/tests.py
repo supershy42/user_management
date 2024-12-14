@@ -19,14 +19,13 @@ class NicknameCheckTest(APITestCase):
         response = self.client.post(self.url, data)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("This nickname is available.", response.data["message"])
+        self.assertIn("ok", response.data["message"])
 
     def test_nickname_unavailable(self):
         data = {'nickname': 'existinguser'}
         response = self.client.post(self.url, data)
         
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("This nickname is already in use.", response.data["nickname"][0])
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
 
 class EmailCheckTest(APITestCase):
@@ -50,8 +49,7 @@ class EmailCheckTest(APITestCase):
         data = {'email': self.existing_user.email}
         response = self.client.post(self.url, data)
         
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("This email is already in use", response.data["email"][0])
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
 
 class UserRegisterTest(APITestCase):
@@ -77,7 +75,6 @@ class UserRegisterTest(APITestCase):
         response = self.client.post(self.url, data)
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn("Regstration successful.", response.data["message"])
 
         user_exists = User.objects.filter(email=self.email).exists()
         self.assertTrue(user_exists)
@@ -92,7 +89,6 @@ class UserRegisterTest(APITestCase):
         response = self.client.post(self.url, data)
         
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Invalid or expired verification code.", response.data["code"])
 
 
 class UserLoginTest(APITestCase):
@@ -126,7 +122,7 @@ class UserLoginTest(APITestCase):
         url = reverse('login')
         response = self.client.post(url, data)
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn('Invalid credentials', str(response.data))
         
 

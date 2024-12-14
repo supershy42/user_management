@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import ErrorDetail
 
 def response_ok(message="ok", status=status.HTTP_200_OK):
     if not isinstance(message, dict):
@@ -7,24 +8,20 @@ def response_ok(message="ok", status=status.HTTP_200_OK):
     return Response(message, status=status)
 
 def response_error(errors):
-    message = extract_message(errors)
-    if not message:
-        message = {"message": "unknown error."}
+    if not errors:
+        errors = "unknown error."
     return Response(
-        message,
+        {"message": errors},
         status=extract_status(errors)
     )
-    
+
 def extract_status(errors):
     for key, value in errors.items():
-        if isinstance(value, dict) and "status" in value:
-            return value["status"]
-    return status.HTTP_400_BAD_REQUEST
-
-def extract_message(errors):
-    message = None
-    if isinstance(errors, dict):
-        error = next(iter(errors.values()))
-        if isinstance(error, dict) and "message" in error:
-            message = {"message": error["message"]}
-    return message
+        if key == "status":
+            if isinstance(value, ErrorDetail):
+                return str(value)
+            elif isinstance(value, list) and isinstance(value[0], ErrorDetail):
+                return str(value[0])
+        elif isinstance(value, dict):  # 중첩된 dict 처리
+            return extract_status(value)  # 재귀 호출
+    return None
