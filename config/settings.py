@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'friend',
     'drf_spectacular',
     'corsheaders',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -127,6 +128,16 @@ AUTH_USER_MODEL = 'user_management.User'
 
 # ASGI APPLICATION 설정
 ASGI_APPLICATION = 'config.routing.application'
+
+# Channels Layers 설정 (Redis 백엔드 사용)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],  # Redis 서버 주소
+        },
+    },
+}
 
 # CORS
 CORS_ALLOW_ALL_ORIGINS = True
