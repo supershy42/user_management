@@ -8,9 +8,8 @@ from .redis_utils import (
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # 사용자 ID 가져오기
-        try:
-            self.user_id = self.scope['user_id']
-        except KeyError:
+        self.user_id = self.scope.get('user_id')
+        if not self.user_id:
             await self.close()
             return
         
