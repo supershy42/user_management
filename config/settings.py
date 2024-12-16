@@ -124,7 +124,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 AUTH_USER_MODEL = 'user_management.User'
 
 # ASGI APPLICATION 설정
-ASGI_APPLICATION = 'config.routing.application'
+ASGI_APPLICATION = 'config.asgi.application'
 
 # Channels Layers 설정 (Redis 백엔드 사용)
 CHANNEL_LAYERS = {
