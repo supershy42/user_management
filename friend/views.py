@@ -2,14 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .services import send_friend_request, respond_to_friend_request, get_friends_list
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError, NotFound
 from drf_spectacular.utils import extend_schema
 
 
 class SendFriendRequestView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def post(self, request):
         to_user_id = request.data.get('to_user_id')
         try:
@@ -38,7 +35,6 @@ class RespondToFriendRequestView(APIView):
 
 
 class FriendListView(APIView):
-    permission_classes = [IsAuthenticated]
     @extend_schema(
         summary="Get the friend list of the authenticated user",
         responses={
