@@ -1,8 +1,9 @@
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from .models import User, EmailVerificationCode
 from .serializers import UserProfileSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class NicknameCheckTest(APITestCase):
@@ -133,6 +134,11 @@ class UserProfileViewTests(APITestCase):
             nickname='ActiveUser',
             password='password123',
         )
+        self.client = APIClient()
+        
+        # JWT 토큰 생성 및 헤더 추가
+        refresh = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {str(refresh.access_token)}')
 
     def get_user_profile_url(self, user_id):
         return reverse('user-profile', kwargs={'user_id': user_id})
