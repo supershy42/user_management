@@ -51,6 +51,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.broadcast_message(notification_type, content)
         else:
             self.send(json.dumps({'error': 'Invalid notification type'}))
+            
+    async def reception_invitation(self, event):
+        await self.send_json(event)
 
     # 메시지를 그룹에 브로드캐스트
     async def broadcast_message(self, notification_type, content):
@@ -69,3 +72,11 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'notification_type': event['notification_type'],
             'content': event['content']
         }))
+        
+    async def send_json(self, message):
+        try:
+            json_message = json.dumps(message)
+            await self.send(text_data=json_message)
+        except (TypeError, ValueError) as e:
+            error_message = {"type": "error", "message":"Invalid json format."}
+            await self.send(text_data=json.dumps(error_message))
