@@ -1,4 +1,4 @@
-# srcs/user_management/Dockerfile
+# srcs/user/Dockerfile
 
 # Python 이미지 사용
 FROM python:3.10-slim
